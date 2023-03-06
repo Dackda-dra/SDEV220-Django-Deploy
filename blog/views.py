@@ -104,13 +104,13 @@ def comment_remove(request, pk):
 class AddBookView(View):
     @method_decorator(csrf_protect)
     def get(self, request):
-        with open("Blog/data.json") as f:
+        with open("blog/data.json") as f:
             data = json.load(f)
         return render(request, 'blog/add_book.html')
         
     @method_decorator(csrf_protect)
     def post(self, request):
-        with open("Blog/data.json") as f:
+        with open("blog/data.json") as f:
             data = json.load(f)
         bookNameList = data['BookNameList']
         bookAuthorList = data['BookAuthorList']
@@ -133,7 +133,7 @@ class AddBookView(View):
         bookGenreList.append(book_genre)
         bookAvailable.append(book_available)
         data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
-        with open("Blog/data.json", "w") as f:
+        with open("blog/data.json", "w") as f:
             json.dump(data, f)
         return render(request, 'blog/add_book.html')
     
@@ -142,7 +142,7 @@ class bookListView(View):
     @method_decorator(csrf_protect)
     def get(self, request):
         search = request.GET.get('q')
-        with open("Blog/data.json") as f:
+        with open("blog/data.json") as f:
             data = json.load(f)
             
         bookNameList = data['BookNameList']
@@ -159,7 +159,7 @@ class bookListView(View):
             
             placeholder1 = position  # initialize placeholder1 with position
             placeholder = {'Position': placeholder1}
-            with open("Blog/position.json", "w") as f:
+            with open("blog/position.json", "w") as f:
                 json.dump(placeholder, f)
             
             if foundAvail == 1:
@@ -190,14 +190,14 @@ class bookListView(View):
                                                        })
 
     def post(self, request):
-        with open("Blog/data.json") as f:
+        with open("blog/data.json") as f:
             data = json.load(f)
         bookNameList = data['BookNameList']
         bookAuthorList = data['BookAuthorList']
         bookGenreList = data['BookGenreList']
         bookAvailable = data['BookAvailable']
         
-        with open("Blog/position.json") as p:
+        with open("blog/position.json") as p:
             getposition = json.load(p)   #I know this would never work on a website with multiple people
             
         position = getposition['Position']
@@ -211,7 +211,7 @@ class bookListView(View):
             if action == 'check_in':
                 bookAvailable[position] = 1
                 data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
-                with open("Blog/data.json", "w") as f:
+                with open("blog/data.json", "w") as f:
                      json.dump(data, f)
                 return redirect('book_list')
             
@@ -220,7 +220,7 @@ class bookListView(View):
                 bookAvailable[position] = 0
                 
                 data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
-                with open("Blog/data.json", "w") as f:
+                with open("blog/data.json", "w") as f:
                    json.dump(data, f)
                 return redirect('book_list')
             
@@ -238,6 +238,6 @@ class bookListView(View):
                 bookAvailable.remove(deleteAvail)
                 
                 data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
-                with open("Blog/data.json", "w") as f:
+                with open("blog/data.json", "w") as f:
                      json.dump(data, f)
                      return redirect('book_list')
