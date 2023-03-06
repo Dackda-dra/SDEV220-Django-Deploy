@@ -7,7 +7,10 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-
+import json
+from django.views.decorators.csrf import csrf_protect
+from django.views import View
+from django.utils.decorators import method_decorator
 
 
 def post_list(request):
@@ -94,3 +97,147 @@ def comment_remove(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     comment.delete()
     return redirect('post_detail', pk=comment.post.pk)
+
+
+
+
+class AddBookView(View):
+    @method_decorator(csrf_protect)
+    def get(self, request):
+        with open("Blog/data.json") as f:
+            data = json.load(f)
+        return render(request, 'blog/add_book.html')
+        
+    @method_decorator(csrf_protect)
+    def post(self, request):
+        with open("Blog/data.json") as f:
+            data = json.load(f)
+        bookNameList = data['BookNameList']
+        bookAuthorList = data['BookAuthorList']
+        bookGenreList = data['BookGenreList']
+        bookAvailable = data['BookAvailable']
+
+        # handle form submission
+        book_name = request.POST.get('book_name')
+        book_author = request.POST.get('book_author')
+        book_genre = request.POST.get('book_genre')
+        book_available = request.POST.get('book_available', False)
+        if book_available:
+            book_available = 1
+        else:
+            book_available = 0
+
+        # add book to list and save to database
+        bookNameList.append(book_name)
+        bookAuthorList.append(book_author)
+        bookGenreList.append(book_genre)
+        bookAvailable.append(book_available)
+        data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
+        with open("Blog/data.json", "w") as f:
+            json.dump(data, f)
+        return render(request, 'blog/add_book.html')
+    
+    
+class bookListView(View):
+    @method_decorator(csrf_protect)
+    def get(self, request):
+        search = request.GET.get('q')
+        with open("Blog/data.json") as f:
+            data = json.load(f)
+            
+        bookNameList = data['BookNameList']
+        bookAuthorList = data['BookAuthorList']
+        bookGenreList = data['BookGenreList']
+        bookAvailable = data['BookAvailable']
+        
+        if search in bookNameList:
+            position = bookNameList.index(search)
+            foundName = bookNameList[position]
+            foundAuthor = bookAuthorList[position]
+            foundGenre = bookGenreList[position]
+            foundAvail = bookAvailable[position]
+            
+            placeholder1 = position  # initialize placeholder1 with position
+            placeholder = {'Position': placeholder1}
+            with open("Blog/position.json", "w") as f:
+                json.dump(placeholder, f)
+            
+            if foundAvail == 1:
+                foundAvail = 'Yes'
+            else:
+                foundAvail='No'
+            
+            message = ''
+        else:
+            foundName = ""
+            foundAuthor = ""
+            foundGenre = ""
+            foundAvail = ""
+            message = f"No books found containing '{search}'"
+            
+        books = zip(bookNameList, bookAuthorList, bookGenreList, bookAvailable)
+        
+
+
+        
+        
+        return render(request, 'blog/book_list.html', {'books': books, 'message': message, 
+                                                       'foundName': foundName, 
+                                                       'foundAuthor': foundAuthor, 
+                                                       'foundGenre': foundGenre, 
+                                                       'foundAvail': foundAvail,
+                                                       'search': search  # Add the search parameter to the context
+                                                       })
+
+    def post(self, request):
+        with open("Blog/data.json") as f:
+            data = json.load(f)
+        bookNameList = data['BookNameList']
+        bookAuthorList = data['BookAuthorList']
+        bookGenreList = data['BookGenreList']
+        bookAvailable = data['BookAvailable']
+        
+        with open("Blog/position.json") as p:
+            getposition = json.load(p)   #I know this would never work on a website with multiple people
+            
+        position = getposition['Position']
+        
+        if request.method == 'POST':
+            action = request.POST.get('action')
+            
+            
+            
+            
+            if action == 'check_in':
+                bookAvailable[position] = 1
+                data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
+                with open("Blog/data.json", "w") as f:
+                     json.dump(data, f)
+                return redirect('book_list')
+            
+            
+            elif action == 'check_out':
+                bookAvailable[position] = 0
+                
+                data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
+                with open("Blog/data.json", "w") as f:
+                   json.dump(data, f)
+                return redirect('book_list')
+            
+            
+            
+            elif action == 'delete':
+                deleteName = bookNameList[position]
+                deleteAuthor = bookAuthorList[position]
+                deleteGenre = bookGenreList[position]
+                deleteAvail = bookAvailable[position]
+                
+                bookNameList.remove(deleteName)
+                bookAuthorList.remove(deleteAuthor)
+                bookGenreList.remove(deleteGenre)
+                bookAvailable.remove(deleteAvail)
+                
+                data = {"BookNameList": bookNameList, "BookGenreList": bookGenreList, "BookAuthorList": bookAuthorList, "BookAvailable": bookAvailable}
+                with open("Blog/data.json", "w") as f:
+                     json.dump(data, f)
+                     return redirect('book_list')

@@ -1,0 +1,96 @@
+
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<style>
+  table
+{
+     width: 90%;
+     margin: auto;
+     border: 1px solid #000000;
+     border-collapse: collapse;
+     margin-top: 1em;
+}
+
+td 
+{
+     padding: 5px;
+     border: 2px solid #000000;
+     border-color: #000000;
+     text-align: center;
+}
+
+th 
+{
+     padding: 5px;
+     border: 2px solid #000000;
+     border-color: #000000;
+}
+</style>
+
+
+  <h1>List of Books</h1>
+
+
+
+  <table>
+    <tr>
+      <th>Book Name</th>
+      <th>Book Author</th>
+      <th>Book Genre</th>
+    </tr>
+    {% for book in books %}
+    <tr>
+      <td>{{ book.0 }}</td>
+      <td>{{ book.1 }}</td>
+      <td>{{ book.2 }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+
+
+  <style>
+
+    section
+    {
+        border: #000000 solid;
+        width: 20%;
+        text-align: center;
+        margin: auto;
+        margin-top: 5em;
+    }
+    </style>
+
+
+{% if foundName %}
+  <h2>Book Found:</h2>
+  <ul>
+    <li><strong>Title:</strong> {{ foundName }}</li>
+    <li><strong>Author:</strong> {{ foundAuthor }}</li>
+    <li><strong>Genre:</strong> {{ foundGenre }}</li>
+    <li><strong>Available:</strong> {{ foundAvail }}</li>
+  </ul>
+{% endif %}
+    
+    
+    <form method="GET" action="{% url 'book_list' %}">
+      <input type="text" name="q" value="{{ request.GET.q }}">
+      <button type="submit">Search</button>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+  </form>
+  <form method="POST" action="{% url 'book_list' %}">
+    {% csrf_token %}
+    <label for="action">Select an action:</label>
+    <select name="action" id="action">
+      <option value="check_in">Check In</option>
+      <option value="check_out">Check Out</option>
+      <option value="delete">Delete</option>
+    </select>
+    <button type="submit">Submit</button>
+  </form>
+  
+  
+{% endblock %}

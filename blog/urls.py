@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from .views import AddBookView, bookListView
 
 urlpatterns = [
     path('', views.post_list, name='post_list'),
@@ -13,4 +13,5 @@ urlpatterns = [
     path('post/<int:pk>/comment/', views.add_comment_to_post, name='add_comment_to_post'),
     path('comment/<int:pk>/approve/', views.comment_approve, name='comment_approve'),
     path('comment/<int:pk>/remove/', views.comment_remove, name='comment_remove'),
-]
+    path('add_book/', lambda request: AddBookView.as_view()(request), name='add_book'),
+    path('book_list/', lambda request: bookListView.as_view()(request), name='book_list'),]

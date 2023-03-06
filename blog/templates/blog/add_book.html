@@ -1,0 +1,36 @@
+
+{% extends 'blog/base.html' %}
+{% block content %}
+<style>
+
+section
+{
+    border: #000000 solid;
+    width: 20%;
+    text-align: center;
+    margin: auto;
+    margin-top: 5em;
+}
+</style>
+
+
+<section>
+    <form method="POST" action="{% url 'add_book' %}">
+        {% csrf_token %}
+        <label for="book_name">Enter book name:</label>
+        <input type="text" id="book_name" name="book_name">
+        <br>
+        <label for="book_author">Enter book author:</label>
+        <input type="text" id="book_author" name="book_author">
+        <br>
+        <label for="book_genre">Enter book genre:</label>
+        <input type="text" id="book_genre" name="book_genre">
+        <br>
+        <input type="checkbox" id="book_available" name="book_available" value="1">
+        <label for="book_available">Is this book available?</label>
+        <br>
+        <input type="submit" value="Add Book">
+    </form>
+</section>
+
+{% endblock %}
